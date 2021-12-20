@@ -22,6 +22,7 @@ rebuild=0
 all=0
 
 # allocator versions
+version_minesweeper=main
 version_dieharder=1d08836bdd6f935b333ec503cd8c9634c69de590
 version_hd=5afe855 # 3.13 #a43ac40 #d880f72  #9d137ef37
 version_hm=main
@@ -44,6 +45,7 @@ version_redis=6.0.9
 version_lean=v3.4.2
 
 # allocators
+setup_minesweeper=0
 setup_dieharder=0
 setup_hd=0
 setup_hm=0
@@ -86,6 +88,7 @@ while : ; do
     "") break;;
     all|none)
         all=$flag_arg
+        setup_minesweeper=$flag_arg
         setup_dieharder=$flag_arg
         setup_hd=$flag_arg              
         setup_iso=$flag_arg
@@ -115,6 +118,8 @@ while : ; do
         setup_bench=$flag_arg;;
     ch)
         setup_ch=$flag_arg;;
+    minesweeper)
+          setup_minesweeper=$flag_arg;;
     dieharder)
           setup_dieharder=$flag_arg;;
     hd)
@@ -168,6 +173,7 @@ while : ; do
         echo "  --rebuild                    force re-clone and re-build for given tools"
         echo "  --verbose                    be verbose"
         echo ""
+        echo "  minesweeper                  setup minesweeper ($version_minesweeper)"
         echo "  dieharder                    setup dieharder ($version_dieharder)"
         echo "  hd                           setup hoard ($version_hd)"
         echo "  hm                           setup hardened_malloc ($version_hm)"
@@ -339,6 +345,14 @@ if test "$setup_scudo" = "1"; then
   cd "compiler-rt/lib/scudo/standalone"
   # TODO: make the next line prettier instead of hardcoding everything.
   clang++ -flto -fuse-ld=lld -fPIC -std=c++14 -fno-exceptions -fno-rtti -fvisibility=internal -msse4.2 -O3 -I include -shared -o libscudo$extso *.cpp -pthread
+  cd -
+  popd
+fi
+
+if test "$setup_minesweeper" = "1"; then
+  checkout minesweeper $version_minesweeper minesweeper https://github.com/EMarci15/asplos22-minesweeper-reproduce.git "--recursive"
+  cd scripts
+  ./build_minesweeper.sh
   cd -
   popd
 fi
