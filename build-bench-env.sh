@@ -23,6 +23,8 @@ all=0
 
 # allocator versions
 version_minesweeper=main
+version_markus=master
+version_ffmalloc=master
 version_dieharder=1d08836bdd6f935b333ec503cd8c9634c69de590
 version_hd=5afe855 # 3.13 #a43ac40 #d880f72  #9d137ef37
 version_hm=main
@@ -46,6 +48,8 @@ version_lean=v3.4.2
 
 # allocators
 setup_minesweeper=0
+setup_markus=0
+setup_ffmalloc=0
 setup_dieharder=0
 setup_hd=0
 setup_hm=0
@@ -89,6 +93,8 @@ while : ; do
     all|none)
         all=$flag_arg
         setup_minesweeper=$flag_arg
+        setup_markus=$flag_arg
+        setup_ffmalloc=$flag_arg
         setup_dieharder=$flag_arg
         setup_hd=$flag_arg              
         setup_iso=$flag_arg
@@ -120,6 +126,10 @@ while : ; do
         setup_ch=$flag_arg;;
     minesweeper)
           setup_minesweeper=$flag_arg;;
+    markus)
+          setup_markus=$flag_arg;;
+    ffmalloc)
+          setup_ffmalloc=$flag_arg;;
     dieharder)
           setup_dieharder=$flag_arg;;
     hd)
@@ -174,6 +184,8 @@ while : ; do
         echo "  --verbose                    be verbose"
         echo ""
         echo "  minesweeper                  setup minesweeper ($version_minesweeper)"
+        echo "  markus                       setup markus ($version_markus)"
+        echo "  ffmalloc                     setup ffmalloc ($version_ffmalloc)"
         echo "  dieharder                    setup dieharder ($version_dieharder)"
         echo "  hd                           setup hoard ($version_hd)"
         echo "  hm                           setup hardened_malloc ($version_hm)"
@@ -354,6 +366,23 @@ if test "$setup_minesweeper" = "1"; then
   cd scripts
   ./build_minesweeper.sh
   cd -
+  popd
+fi
+
+if test "$setup_markus" = "1"; then
+  checkout markus $version_markus markus https://github.com/SamAinsworth/MarkUs-sp2020.git ""
+  cd bdwgc-markus
+  ./autogen.sh
+  mkdir -p lib
+  ./configure --prefix="$(pwd)/.."  --enable-redirect-malloc --enable-threads=posix --disable-gc-assertions --enable-thread-local-alloc --enable-parallel-mark --disable-munmap --enable-cplusplus --enable-large-config --disable-gc-debug
+  make install
+  cd -
+  popd
+fi
+
+if test "$setup_ffmalloc" = "1"; then
+  checkout ffmalloc $version_ffmalloc ffmalloc https://github.com/bwickman97/ffmalloc.git ""
+  make sharednpmt
   popd
 fi
 
